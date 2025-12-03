@@ -1,0 +1,17 @@
+---
+title: "Analyzing Pomona-Pitzer Men's Tennis Point-by-Point Data to Provide Detailed Predictions and Matchup Analysis"
+author: "Neil Chulani, Charlie Coleman, Drew Goldman"
+subtitle: "Final Project Midway Checkin"
+format: pdf
+execute:
+  warning: false
+  message: false
+---
+
+1.  We currently have approximately 70% of the data we expect to use for our project. Getting the remaining data is simply about pestering our teammates to download the raw data from our match replay portal (since each player only has access to their own matches). We plan on also asking our coach if he has access to everyone's matches since that will be a much more efficient way to get all of the necessary data. That being said, we have already begun working with the raw data from matches that we have, and have made good progress (see analysis.qmd and/or analysis.pdf)
+
+2.  Please refer to analysis.qmd and/or analysis.pdf. We have already successfully cleaned our raw data, and have even trained a neural network to predict the winner of a point. The neural network itself is really bad right now, but we know what our next steps are (discussed in question 3).
+
+3.  Currently, our neural network uses data from matches played between many different people. As of right now, the biggest issue we have is that when we provide a point for it to predict the winner of, rather than predicting between the two people actually playing the point, it predicts a winner from all possible players (which of course makes absolutely no sense). The current neural network is essentially useless, but the main goal of this iteration was to demonstrate that we knew how to work with our data (and clean it) and have started working with the neural network libraries (mainly keras3). We are investigating the best approach for where to go from here. Multiple neural networks? Some way to identify which players are playing? All up for consideration right now.
+
+4.  The large thing that we are doing for this project that is outside of the course is using a neural network. We are also using a dataset that is non trivial to work with given that it is not public, and is quite niche.

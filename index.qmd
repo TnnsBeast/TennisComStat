@@ -1,0 +1,42 @@
+---
+title: "Pomona-Pitzer Tennis Insights"
+format:
+  html:
+    toc: false
+---
+
+<div class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Group F · Computational Statistics</p>
+    <h1>Player Improvement, Match Insights, and Fair Point Prediction</h1>
+    <p class="lede">Point-by-point Comstat data turned into actionable skill recommendations and matchup intelligence.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="player_improvement.html">View Player Improvement</a>
+      <a class="btn ghost" href="analysis.pdf">Download Full Analysis (PDF)</a>
+    </div>
+  </div>
+</div>
+
+## Quick links
+
+- Player uplift recommendations: [player_improvement.html](player_improvement.html)  
+- Fair pre-point model (no rally leakage): [fair_model.html](fair_model.html)  
+- Full writeup (PDF): [analysis.pdf](analysis.pdf)
+
+## What’s inside
+
+- **Embedding neural net** that learns player-specific tendencies and context interactions without massive one-hot vectors.
+- **LOFO by skill bucket** to see which areas (serve, return, serve+1, rally control, pressure) drive point outcomes.
+- **Counterfactual uplift** per player to rank the single best skill to train for the biggest point-win lift.
+- **Author highlights**: top recommendation for Neil Chulani, Charlie Coleman, and Drew Goldman.
+
+## How to view locally
+
+If you have Quarto installed:
+
+```bash
+quarto render
+open docs/index.html
+```
+
+GitHub Pages can serve `docs/` on the `main` branch for a one-click hosted version.
