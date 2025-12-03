@@ -111,6 +111,10 @@ body {
   overflow: hidden;
 }
 
+.landing-shell section {
+  margin-bottom: clamp(1.8rem, 3vw, 3rem);
+}
+
 .landing-shell::after,
 .landing-shell::before {
   content: "";
@@ -319,11 +323,55 @@ body {
 .highlight strong { color: #0b1221; }
 .highlight p { margin: 0.25rem 0 0; color: var(--muted); }
 
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.5rem;
+}
+
+.table-toolbar .toolbar-input {
+  flex: 1 1 240px;
+  max-width: 320px;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,0.14);
+  font-size: 0.95rem;
+}
+
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(37,99,235,0.25);
+  background: rgba(37,99,235,0.08);
+  color: #0b1221;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.collapsible-table {
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.collapsible-table table {
+  margin: 0;
+}
+
 .report-wrapper {
   position: relative;
   z-index: 2;
   max-width: 1200px;
-  margin: 0 auto 2.5rem;
+  margin: 3rem auto 2.8rem;
   padding: 0 clamp(1.2rem, 3vw, 2.2rem) clamp(2rem, 4vw, 3rem);
 }
 
@@ -345,6 +393,70 @@ body {
   color: var(--muted);
 }
 
+.raw-data {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 2.4rem auto 0;
+  padding: 0 clamp(1.2rem, 3vw, 2.2rem);
+}
+
+.data-card {
+  background: rgba(255,255,255,0.9);
+  border-radius: 16px;
+  padding: 1.2rem 1.3rem 1.4rem;
+  border: 1px solid var(--stroke);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+}
+
+.data-card h2 {
+  margin: 0.1rem 0 0.35rem;
+}
+
+.data-card p {
+  margin: 0 0 0.8rem;
+  color: var(--muted);
+}
+
+.scroll-table {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(12,18,33,0.08);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+}
+
+.scroll-table table {
+  border-collapse: collapse;
+  min-width: 900px;
+  width: max-content;
+  font-size: 0.92rem;
+}
+
+.scroll-table th,
+.scroll-table td {
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.scroll-table th {
+  background: rgba(37,99,235,0.08);
+  font-weight: 700;
+  color: #0b1221;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.scroll-table tr:last-child td {
+  border-bottom: none;
+}
+
+#analysis {
+  scroll-margin-top: 20px;
+}
 #analysis {
   scroll-margin-top: 20px;
 }
@@ -438,6 +550,31 @@ body {
       </div>
     </div>
   </section>
+</div>
+
+<div class="raw-data" id="raw-data">
+  <div class="data-card">
+    <div class="eyebrow">Data snippet</div>
+    <h2>Raw CSV glimpse</h2>
+    <p>Sample rows from <code>Drew GOLDMAN - Matthew ROBINSON. ITA Regional Championships 2024 [FMLC]_3924.csv</code>. Scroll horizontally to see the full schema used in the analysis.</p>
+    <div class="scroll-table">
+      <table>
+        <thead>
+          <tr>
+            <th>1.01 POSITION</th><th>1.02 DURATION</th><th>1.03 SCORE</th><th>1.04 ENDING SHOT MARKER ID</th><th>1.1 WHO WON THE POINT</th><th>1.11 WHO LOST THE POINT</th><th>1.2 RALLY OUTCOME</th><th>1.2.1 RALLY OUTCOME DETAILED</th><th>1.3 RALLY LENGTH</th><th>1.3.1 RALLY LENGTH DETAILED</th><th>1.4 GAME SCORE CONDITIONS</th><th>1.5 SET SCORE CONDITIONS</th><th>2.1 ENDING SHOT. SHOT TYPE</th><th>2.2 ENDING SHOT. SHOT CATEGORY</th><th>2.3 ENDING SHOT. SHOT DIRECTION</th><th>2.4 ENDING SHOT. HITTING POINT</th><th>2.5 ENDING SHOT. DEPTH</th><th>3.1 SERVER</th><th>3.2 SERVE ORDER</th><th>3.3 SERVE DIRECTION</th><th>4.1 RETURN. SHOT TYPE</th><th>4.1 RETURNER</th><th>4.2 RETURN. SHOT CATEGORY</th><th>4.3 RETURN. SHOT DIRECTION</th><th>4.4 RETURN. HITTING POINT</th><th>4.5 RETURN. DEPTH</th><th>5.1 SERVE + 1 SHOT. SHOT TYPE</th><th>5.2 SERVE + 1 SHOT. SHOT CATEGORY</th><th>5.3 SERVE + 1 SHOT. SHOT DIRECTION</th><th>5.4 SERVE + 1 SHOT. HITTING POINT</th><th>5.5 SERVE + 1 SHOT. DEPTH</th><th>6.1 CHEAP POINT</th><th>7.1 DISPUTABLE POINT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>17</td><td>9</td><td>Set 1; 0:0; 0:0*</td><td>5005</td><td>Drew Goldman</td><td>Matthew Robinson</td><td>Unforced Error</td><td>Unforced Error</td><td>5-8 shots</td><td>5</td><td>Non-stress point</td><td>Beginning: 1-4 game</td><td>Ending shot. Forehand</td><td>Ending shot. Topspin/Flat</td><td>Cross</td><td>Ending shot. Neutral Defensive</td><td>Ending shot. Deep</td><td>Matthew Robinson</td><td>1st serve</td><td>Deuce court (Body)</td><td>Return. Backhand</td><td>Drew Goldman</td><td>Return. Topspin/Flat</td><td>Down the line</td><td>Return. Neutral basic</td><td>Return. Deep</td><td>Serve + 1 shot. Forehand</td><td>Serve + 1 shot. Topspin/Flat</td><td>Cross</td><td>Serve + 1 shot. Neutral Aggressive</td><td>Serve + 1 shot. Middle</td><td>Not a Cheap point</td><td></td>
+          </tr>
+          <tr>
+            <td>45</td><td>8</td><td>Set 1; 0:0; 15:0*</td><td>5010</td><td>Matthew Robinson</td><td>Drew Goldman</td><td>Unforced Error</td><td>Unforced Error</td><td>3-4 shots</td><td>4</td><td>Non-stress point</td><td>Beginning: 1-4 game</td><td>Ending shot. Backhand</td><td>Ending shot. Topspin/Flat</td><td>Center</td><td>Ending shot. Neutral Aggressive</td><td>Ending shot. Short</td><td>Matthew Robinson</td><td>1st serve</td><td>Ad court (Wide)</td><td>Return. Backhand</td><td>Drew Goldman</td><td>Return. Topspin/Flat</td><td>Center</td><td>Return. Half court zone</td><td>Return. Short</td><td>Serve + 1 shot. Forehand</td><td>Serve + 1 shot. Topspin/Flat</td><td>Cross</td><td>Serve + 1 shot. Neutral Aggressive</td><td>Serve + 1 shot. Deep</td><td>Not a Cheap point</td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <div id="analysis" class="report-wrapper">
@@ -1569,34 +1706,6 @@ $loss
 </tbody>
 </table>
 </div>
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Author</th>
-<th style="text-align: left;">Skill bucket</th>
-<th style="text-align: right;">Uplift (Delta point-win prob)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Charlie Coleman</td>
-<td style="text-align: left;">rally_control</td>
-<td style="text-align: right;">0.007</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Drew Goldman</td>
-<td style="text-align: left;">return</td>
-<td style="text-align: right;">0.007</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Neil Chulani</td>
-<td style="text-align: left;">serve_plus_one</td>
-<td style="text-align: right;">0.040</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 <!-- -->
 
@@ -2493,76 +2602,61 @@ $loss
 <span id="cb12-437"><a href="#cb12-437" aria-hidden="true" tabindex="-1"></a>  base_probs_p1 <span class="ot">&lt;-</span> <span class="fu">predict_probs</span>(model, base_processed, categorical_vars, numeric_vars)</span>
 <span id="cb12-438"><a href="#cb12-438" aria-hidden="true" tabindex="-1"></a>  base_player_prob <span class="ot">&lt;-</span> <span class="fu">if_else</span>(df_player<span class="sc">$</span>player_is_p1, base_probs_p1, <span class="dv">1</span> <span class="sc">-</span> base_probs_p1)</span>
 <span id="cb12-439"><a href="#cb12-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-440"><a href="#cb12-440" aria-hidden="true" tabindex="-1"></a>  tweaked_df <span class="ot">&lt;-</span> <span class="fu">apply_bucket_tweak</span>(df_player, player, bucket_cols)</span>
-<span id="cb12-441"><a href="#cb12-441" aria-hidden="true" tabindex="-1"></a>  tweaked_processed <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, tweaked_df)</span>
-<span id="cb12-442"><a href="#cb12-442" aria-hidden="true" tabindex="-1"></a>  tweaked_probs_p1 <span class="ot">&lt;-</span> <span class="fu">predict_probs</span>(model, tweaked_processed, categorical_vars, numeric_vars)</span>
-<span id="cb12-443"><a href="#cb12-443" aria-hidden="true" tabindex="-1"></a>  tweaked_player_prob <span class="ot">&lt;-</span> <span class="fu">if_else</span>(tweaked_df<span class="sc">$</span>player_is_p1, tweaked_probs_p1, <span class="dv">1</span> <span class="sc">-</span> tweaked_probs_p1)</span>
-<span id="cb12-444"><a href="#cb12-444" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-445"><a href="#cb12-445" aria-hidden="true" tabindex="-1"></a>  uplift <span class="ot">&lt;-</span> <span class="fu">mean</span>(tweaked_player_prob <span class="sc">-</span> base_player_prob, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-446"><a href="#cb12-446" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">uplift =</span> uplift)</span>
-<span id="cb12-447"><a href="#cb12-447" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-448"><a href="#cb12-448" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-449"><a href="#cb12-449" aria-hidden="true" tabindex="-1"></a>all_players <span class="ot">&lt;-</span> clean_data <span class="sc">%&gt;%</span></span>
-<span id="cb12-450"><a href="#cb12-450" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb12-451"><a href="#cb12-451" aria-hidden="true" tabindex="-1"></a>    <span class="at">server_player =</span> <span class="fu">as.character</span>(server_player),</span>
-<span id="cb12-452"><a href="#cb12-452" aria-hidden="true" tabindex="-1"></a>    <span class="at">returner_player =</span> <span class="fu">as.character</span>(returner_player)</span>
-<span id="cb12-453"><a href="#cb12-453" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb12-454"><a href="#cb12-454" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(server_player, returner_player) <span class="sc">%&gt;%</span></span>
-<span id="cb12-455"><a href="#cb12-455" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"player"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-456"><a href="#cb12-456" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">player =</span> <span class="fu">str_trim</span>(player)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-457"><a href="#cb12-457" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player), player <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-458"><a href="#cb12-458" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb12-459"><a href="#cb12-459" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(player) <span class="sc">%&gt;%</span></span>
-<span id="cb12-460"><a href="#cb12-460" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(player)</span>
-<span id="cb12-461"><a href="#cb12-461" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-462"><a href="#cb12-462" aria-hidden="true" tabindex="-1"></a>uplift_table <span class="ot">&lt;-</span> <span class="fu">crossing</span>(<span class="at">player =</span> all_players, <span class="at">bucket =</span> <span class="fu">names</span>(skill_buckets)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-463"><a href="#cb12-463" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">res =</span> <span class="fu">map2</span>(player, bucket, compute_uplift)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-464"><a href="#cb12-464" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(res)</span>
-<span id="cb12-465"><a href="#cb12-465" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb12-466"><a href="#cb12-466" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-467"><a href="#cb12-467" aria-hidden="true" tabindex="-1"></a><span class="fu">## Report-ready tables</span></span>
-<span id="cb12-468"><a href="#cb12-468" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-469"><a href="#cb12-469" aria-hidden="true" tabindex="-1"></a><span class="in">```{r player-recs, echo=FALSE}</span></span>
-<span id="cb12-470"><a href="#cb12-470" aria-hidden="true" tabindex="-1"></a><span class="co"># Top-3 recommendations per player</span></span>
-<span id="cb12-471"><a href="#cb12-471" aria-hidden="true" tabindex="-1"></a>top3 <span class="ot">&lt;-</span> uplift_table <span class="sc">%&gt;%</span></span>
-<span id="cb12-472"><a href="#cb12-472" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(player) <span class="sc">%&gt;%</span></span>
-<span id="cb12-473"><a href="#cb12-473" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(<span class="at">order_by =</span> uplift, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-474"><a href="#cb12-474" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(player, <span class="fu">desc</span>(uplift))</span>
-<span id="cb12-475"><a href="#cb12-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-476"><a href="#cb12-476" aria-hidden="true" tabindex="-1"></a><span class="co"># Top-1 recommendation per player</span></span>
-<span id="cb12-477"><a href="#cb12-477" aria-hidden="true" tabindex="-1"></a>top1 <span class="ot">&lt;-</span> uplift_table <span class="sc">%&gt;%</span></span>
-<span id="cb12-478"><a href="#cb12-478" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(player) <span class="sc">%&gt;%</span></span>
-<span id="cb12-479"><a href="#cb12-479" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(<span class="at">order_by =</span> uplift, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-480"><a href="#cb12-480" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(player)</span>
-<span id="cb12-481"><a href="#cb12-481" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-482"><a href="#cb12-482" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb12-483"><a href="#cb12-483" aria-hidden="true" tabindex="-1"></a>  top1,</span>
-<span id="cb12-484"><a href="#cb12-484" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb12-485"><a href="#cb12-485" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Player"</span>, <span class="st">"Skill bucket"</span>, <span class="st">"Uplift (Delta point-win prob)"</span>)</span>
-<span id="cb12-486"><a href="#cb12-486" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-487"><a href="#cb12-487" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-488"><a href="#cb12-488" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb12-489"><a href="#cb12-489" aria-hidden="true" tabindex="-1"></a>  top3,</span>
-<span id="cb12-490"><a href="#cb12-490" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb12-491"><a href="#cb12-491" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Player"</span>, <span class="st">"Skill bucket"</span>, <span class="st">"Uplift (Delta point-win prob)"</span>)</span>
-<span id="cb12-492"><a href="#cb12-492" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-493"><a href="#cb12-493" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-494"><a href="#cb12-494" aria-hidden="true" tabindex="-1"></a><span class="co"># Author highlights: focus areas for project authors (if present in the data)</span></span>
-<span id="cb12-495"><a href="#cb12-495" aria-hidden="true" tabindex="-1"></a>author_players <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Neil Chulani"</span>, <span class="st">"Charlie Coleman"</span>, <span class="st">"Drew Goldman"</span>)</span>
-<span id="cb12-496"><a href="#cb12-496" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-497"><a href="#cb12-497" aria-hidden="true" tabindex="-1"></a>authors_top1 <span class="ot">&lt;-</span> top1 <span class="sc">%&gt;%</span></span>
-<span id="cb12-498"><a href="#cb12-498" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(player <span class="sc">%in%</span> author_players)</span>
-<span id="cb12-499"><a href="#cb12-499" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-500"><a href="#cb12-500" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb12-501"><a href="#cb12-501" aria-hidden="true" tabindex="-1"></a>  authors_top1,</span>
-<span id="cb12-502"><a href="#cb12-502" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb12-503"><a href="#cb12-503" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Author"</span>, <span class="st">"Skill bucket"</span>, <span class="st">"Uplift (Delta point-win prob)"</span>)</span>
-<span id="cb12-504"><a href="#cb12-504" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-505"><a href="#cb12-505" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
-</div></div></div></div></div>
 </div> <!-- /content -->
 
-</div> <!-- /report-wrapper -->
+<script>
+  (function() {
+    const content = document.querySelector('#quarto-document-content');
+    if (!content) return;
 
+    const tables = Array.from(content.querySelectorAll('table'));
+    if (!tables.length) return;
 
-</body></html>
+    tables.forEach((table) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'collapsible-table';
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-toolbar';
+
+      const btn = document.createElement('button');
+      btn.className = 'collapse-btn';
+      btn.type = 'button';
+      btn.textContent = 'Expand table';
+      btn.setAttribute('data-state', 'closed');
+
+      const input = document.createElement('input');
+      input.className = 'toolbar-input';
+      input.type = 'text';
+      input.placeholder = 'Find player…';
+
+      function filterRows() {
+        const term = (input.value || '').trim().toLowerCase();
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        rows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          const match = term === '' || text.includes(term);
+          row.style.display = match ? '' : 'none';
+        });
+      }
+
+      btn.addEventListener('click', () => {
+        const state = btn.getAttribute('data-state');
+        const open = state === 'open';
+        table.style.display = open ? 'none' : '';
+        btn.textContent = open ? 'Expand table' : 'Collapse table';
+        btn.setAttribute('data-state', open ? 'closed' : 'open');
+        if (!open) filterRows();
+      });
+
+      input.addEventListener('input', filterRows);
+
+      toolbar.appendChild(btn);
+      toolbar.appendChild(input);
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(toolbar);
+      wrapper.appendChild(table);
+      table.style.display = 'none';
+    });
+  })();
+</script>
