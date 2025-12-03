@@ -918,6 +918,7 @@ body {
 $loss
 [1] 0.3849202</code></pre>
 </div>
+<p><strong>What these mean:</strong> accuracy is the share of points correctly predicted (winner vs. loser) on the held-out test set. Loss is the cross-entropy objective the model optimizes; lower is better, and it penalizes overconfident wrong predictions more than small probability errors. Think of it as a smoother measure of calibration + correctness, while accuracy is a hard 0/1 score.</p>
 </div>
 </section>
 <section id="lofo-by-skill-bucket" class="level2">
