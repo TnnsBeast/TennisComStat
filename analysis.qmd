@@ -1,0 +1,576 @@
+---
+title: "Analyzing Pomona-Pitzer Men's Tennis Point-by-Point Data to Provide Detailed Predictions and Matchup Analysis"
+author: "Neil Chulani, Charlie Coleman, Drew Goldman"
+subtitle: "Final Project Midway Progress"
+format: pdf
+execute:
+  warning: false
+  message: false
+---
+
+
+```{r}
+
+library(tidyverse)
+library(janitor)
+
+recode_match <- function(df) {
+  
+  # CLEAN COLUMN NAMES FIRST
+  df <- df |> janitor::clean_names()
+  
+  # Now the winner/loser columns exist
+  players <- unique(c(df$x1_1_who_won_the_point, df$x1_11_who_lost_the_point))
+  players <- players[!is.na(players) & players != ""]
+  
+  if (length(players) != 2) {
+    warning("Match skipped because winner/loser columns did not produce exactly 2 players.")
+    return(NULL)
+  }
+  
+  p1 <- players[1]
+  p2 <- players[2]
+  
+  df <- df %>%
+    mutate(
+      # P1 / P2 label for winner
+      winner = case_when(
+        x1_1_who_won_the_point == p1 ~ "P1",
+        x1_1_who_won_the_point == p2 ~ "P2",
+        TRUE ~ NA_character_
+      ),
+      
+      # NEW: P1 / P2 label for server
+      server = case_when(
+        x3_1_server == p1 ~ "P1",
+        x3_1_server == p2 ~ "P2",
+        TRUE ~ NA_character_
+      ),
+      
+      # NEW: P1 / P2 label for returner (if present)
+      returner = case_when(
+        x4_1_returner == p1 ~ "P1",
+        x4_1_returner == p2 ~ "P2",
+        TRUE ~ NA_character_
+      ),
+      
+      winner = factor(winner, levels=c("P1","P2")),
+      server = factor(server, levels=c("P1","P2")),
+      returner = factor(returner, levels=c("P1","P2"))
+    )
+  
+  return(df)
+}
+
+
+
+path <- "Comstat Data"
+files <- list.files(path, pattern="\\.csv$", full.names=TRUE)
+
+raw_data <- files %>%
+  map(~ read_csv(.x, show_col_types = FALSE) |> recode_match()) %>%
+  discard(is.null) %>%
+  bind_rows(.id = "match_id")
+
+
+clean_data <- raw_data |>
+  janitor::clean_names()  # converts to snake_case automatically
+
+# Read the cleaned column names
+names(clean_data)
+
+```
+
+Now, we have a dataset with cleaned up column names, and we now know all of the different columns we have. Let's continue to clean these up
+```{r}
+clean_data <- raw_data %>%
+  select(
+    match_id,
+    winner,                  # P1/P2 from recode_match
+
+    # Basic point-level descriptors
+    position                 = x1_01_position,
+    duration                 = x1_02_duration,
+    score                    = x1_03_score,
+
+    # Rally & ending shot info
+    ending_shot_marker       = x1_04_ending_shot_marker_id,
+    rally_outcome            = x1_2_rally_outcome,
+    rally_outcome_detail     = x1_2_1_rally_outcome_detailed,
+    rally_length             = x1_3_rally_length,
+    rally_length_detail      = x1_3_1_rally_length_detailed,
+    game_score_cond          = x1_4_game_score_conditions,
+    set_score_cond           = x1_5_set_score_conditions,
+
+    # Ending shot features
+    ending_shot_type         = x2_1_ending_shot_shot_type,
+    ending_shot_category     = x2_2_ending_shot_shot_category,
+    ending_shot_direction    = x2_3_ending_shot_shot_direction,
+    ending_shot_hit_point    = x2_4_ending_shot_hitting_point,
+    ending_shot_depth        = x2_5_ending_shot_depth,
+
+    # >>> P1/P2 server & returner FROM recode_match (do NOT overwrite these!)
+    server,
+    returner,
+
+    # Serve info
+    serve_order              = x3_2_serve_order,
+    serve_direction          = x3_3_serve_direction,
+
+    # Return info
+    return_shot_type         = x4_1_return_shot_type,
+    return_shot_category     = x4_2_return_shot_category,
+    return_shot_direction    = x4_3_return_shot_direction,
+    return_shot_hit_point    = x4_4_return_hitting_point,
+    return_shot_depth        = x4_5_return_depth,
+
+    # Serve +1 info
+    serve1_shot_type         = x5_1_serve_1_shot_shot_type,
+    serve1_shot_category     = x5_2_serve_1_shot_shot_category,
+    serve1_shot_direction    = x5_3_serve_1_shot_shot_direction,
+    serve1_shot_hit_point    = x5_4_serve_1_shot_hitting_point,
+    serve1_shot_depth        = x5_5_serve_1_shot_depth,
+
+    # Flags
+    cheap_point              = x6_1_cheap_point,
+    disputable_point         = x7_1_disputable_point
+  )
+
+
+clean_data
+```
+
+Let's do some feature engineering
+```{r}
+parse_score <- function(score_string) {
+  
+  # Handle NA or blank
+  if (is.na(score_string) || score_string == "") {
+    return(tibble(
+      set_number = NA_integer_,
+      games_server = NA_integer_,
+      games_returner = NA_integer_,
+      points_server = NA_integer_,
+      points_returner = NA_integer_,
+      tiebreak = NA,
+      is_break_point = NA,
+      is_game_point = NA
+    ))
+  }
+  
+  # Split by semicolon
+  parts <- str_split(score_string, ";")[[1]]
+  parts <- trimws(parts)
+  
+  # Extract set number (e.g., "Set 1")
+  set_number <- as.integer(str_extract(parts[1], "\\d+"))
+  
+  # Extract game score (e.g., "2:3")
+  game_score <- str_split(parts[2], ":")[[1]]
+  games_server <- as.integer(game_score[1])
+  games_returner <- as.integer(game_score[2])
+  
+  # Extract point score ("15:30", "40:AD", "*40:15")
+  point_raw <- parts[3]
+  
+  # Remove leading "*" indicating server
+  is_server_point <- str_detect(point_raw, "\\*")
+  point_clean <- gsub("\\*", "", point_raw)
+  
+  pts <- str_split(point_clean, ":")[[1]]
+  p1_pt <- pts[1]
+  p2_pt <- pts[2]
+  
+  # Convert tennis scoring to numeric scale
+  pts_map <- c("0"=0, "15"=1, "30"=2, "40"=3, "AD"=4)
+  
+  points_server <- pts_map[p1_pt]
+  points_returner <- pts_map[p2_pt]
+  
+  # Identify tiebreak
+  tiebreak <- (points_server > 4 | points_returner > 4)
+  
+  # Break point: returner can win game on next point
+  is_break_point <- (
+    points_returner == 4 && points_server <= 3  # AD for returner
+  )
+  
+  # Game point: server can win game next point
+  is_game_point <- (
+    points_server == 4 && points_returner <= 3
+  )
+  
+  # Return results
+  tibble(
+    set_number,
+    games_server,
+    games_returner,
+    points_server,
+    points_returner,
+    tiebreak,
+    is_break_point,
+    is_game_point
+  )
+}
+
+
+clean_data <- clean_data %>%
+  mutate(parsed = map(score, parse_score)) %>%
+  unnest(parsed) %>%
+  select(-score) %>%
+  mutate(
+    server_is_p1 = if_else(server == "P1", 1L, 0L)
+  )
+
+
+```
+
+
+Now, we'll start to divide this data and begin building the model
+```{r}
+library(tidyverse)
+library(recipes)
+library(keras3)
+
+# starting with clean_data from previous step
+clean_data <- clean_data |>
+  mutate(
+    across(where(is.character), as.factor),
+    winner = as.factor(winner)
+  )
+
+# Split train/test by match to avoid leakage
+set.seed(123)
+train_matches <- sample(unique(clean_data$match_id), size = 0.8 * n_distinct(clean_data$match_id))
+train_df <- filter(clean_data, match_id %in% train_matches)
+test_df  <- filter(clean_data, !match_id %in% train_matches)
+
+# Identify variables
+categorical_vars <- setdiff(names(train_df), c("winner", "match_id", "position", "duration"))
+categorical_vars <- categorical_vars[sapply(train_df[categorical_vars], is.factor)]
+
+high_cardinality <- c(
+  "ending_shot_marker",
+  "ending_shot_hit_point",
+  "return_shot_hit_point",
+  "serve1_shot_hit_point"
+)
+
+categorical_vars <- setdiff(categorical_vars, high_cardinality)
+
+
+numeric_vars <- c(
+  "duration",
+  "set_number", "games_server", "games_returner",
+  "points_server", "points_returner",
+  "server_is_p1"
+)
+
+
+
+rec <- recipe(winner ~ ., data = train_df) %>%
+  update_role(match_id, new_role = "ID") %>%
+  step_unknown(all_nominal_predictors()) %>% 
+  step_string2factor(all_nominal_predictors()) %>%
+  step_impute_median(all_of(numeric_vars)) %>%   # <<< NEW (fixes NaNs!)
+  step_normalize(all_of(numeric_vars))
+
+
+
+prep_rec <- prep(rec)
+
+train_processed <- bake(prep_rec, train_df)
+sapply(train_processed[numeric_vars], function(x) sum(is.na(x)))
+test_processed  <- bake(prep_rec, test_df)
+
+```
+
+Now, we have a dataset where numeric columns are normalized, categorial columns are factors, and the target is a factor
+
+```{r}
+# First, we create the embedding layers
+make_embedding <- function(input_name, levels) {
+  input <- layer_input(shape = 1, dtype = "int32", name = input_name)
+  embed_dim <- min(50, ceiling(levels / 2))  # rule-of-thumb
+  embed <- input |>
+    layer_embedding(input_dim = levels + 1,
+                    output_dim = embed_dim,
+                    name = paste0(input_name, "_embed")) |>
+    layer_flatten()
+  list(input = input, output = embed)
+}
+
+# Then, we build all the embedding inputs
+embedding_layers <- map(categorical_vars, ~{
+  n_levels <- length(levels(train_processed[[.x]]))
+  make_embedding(.x, n_levels)
+})
+
+# Now, we construct our numeric inputs
+numeric_input <- layer_input(shape = length(numeric_vars), name = "numeric_input")
+numeric_dense <- numeric_input |> 
+  layer_dense(units = 32, activation = "relu")
+
+# Next, we concatenate everything
+all_inputs <- c(
+  map(embedding_layers, "input"),
+  list(numeric_input)
+)
+
+all_embeddings <- map(embedding_layers, "output")
+
+concat <- layer_concatenate(c(all_embeddings, list(numeric_dense))) |>
+  layer_dense(units = 128, activation = "relu") |>
+  layer_dropout(0.3) |>
+  layer_dense(units = 64, activation = "relu") |>
+  layer_dropout(0.3) |>
+  layer_dense(units = length(levels(train_processed$winner)),
+              activation = "softmax",
+              name = "output")
+
+# And now we compile the model
+model <- keras_model(inputs = all_inputs, outputs = concat)
+
+model |> compile(
+  loss = "sparse_categorical_crossentropy",
+  optimizer = "adam",
+  metrics = "accuracy"
+)
+
+```
+
+At this point, our model should be ready to train
+
+```{r}
+
+# 1. Categorical inputs as integer vectors
+x_train <- lapply(categorical_vars, function(col) {
+  as.integer(train_processed[[col]])
+})
+names(x_train) <- categorical_vars
+
+# 2. Numeric inputs as a matrix
+x_train[["numeric_input"]] <- as.matrix(train_processed[numeric_vars])
+
+# 3. Targets as integer labels (0-based)
+y_train <- as.integer(train_processed$winner) - 1
+
+# Train the model
+history <- model |> fit(
+  x = x_train,
+  y = y_train,
+  epochs = 40,
+  batch_size = 64,
+  validation_split = 0.2
+)
+
+```
+```{r}
+str(history)
+as.data.frame(history) |> names()
+```
+
+```{r, echo=FALSE, fig.width=7, fig.height=8}
+
+library(tidyverse)
+library(ggplot2)
+
+# Extract metrics from keras_training_history
+acc      <- history$metrics$accuracy
+val_acc  <- history$metrics$val_accuracy
+loss     <- history$metrics$loss
+val_loss <- history$metrics$val_loss
+epochs   <- seq_along(acc)
+
+df_plot <- tibble(
+  epoch = epochs,
+  accuracy = acc,
+  val_accuracy = val_acc,
+  loss = loss,
+  val_loss = val_loss
+)
+
+# ---- Accuracy plot ----
+p_acc <- ggplot(df_plot, aes(x = epoch)) +
+  geom_line(aes(y = accuracy, color = "Training Accuracy"), linewidth = 1) +
+  geom_line(aes(y = val_accuracy, color = "Validation Accuracy"), linewidth = 1) +
+  labs(title = "Model Accuracy Over Epochs",
+       x = "Epoch", y = "Accuracy", color="") +
+  scale_color_manual(values = c("Training Accuracy"="blue",
+                                "Validation Accuracy"="red")) +
+  theme_minimal(base_size = 14)
+
+# ---- Loss plot ----
+p_loss <- ggplot(df_plot, aes(x = epoch)) +
+  geom_line(aes(y = loss, color = "Training Loss"), linewidth = 1) +
+  geom_line(aes(y = val_loss, color = "Validation Loss"), linewidth = 1) +
+  labs(title = "Model Loss Over Epochs",
+       x = "Epoch", y = "Loss", color="") +
+  scale_color_manual(values = c("Training Loss"="blue",
+                                "Validation Loss"="red")) +
+  theme_minimal(base_size = 14)
+
+# Display both in the PDF
+p_acc
+p_loss
+
+
+```
+
+
+
+Now let's test the trained model
+
+```{r}
+x_test <- lapply(categorical_vars, function(col) {
+  as.integer(test_processed[[col]])
+})
+names(x_test) <- categorical_vars
+
+x_test[["numeric_input"]] <- as.matrix(test_processed[numeric_vars])
+
+y_test <- as.integer(test_processed$winner) - 1
+
+model |> evaluate(x_test, y_test)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+Let's try to see which variables were most important
+```{r, echo=TRUE, message=TRUE, warning=FALSE, fig.width=7, fig.height=7}
+
+library(tidyverse)
+library(recipes)
+library(keras3)
+
+# -------------------------------
+# 1. Combine all features
+# -------------------------------
+all_vars <- c(numeric_vars, categorical_vars)
+
+# -------------------------------
+# 2. LOFO Function
+# -------------------------------
+run_lofo <- function(remove_var) {
+
+  message("\nRunning LOFO for: ", remove_var)
+
+  # --- Remove variable from dataset ---
+  train_df_sub <- train_df %>% select(-all_of(remove_var))
+  test_df_sub  <- test_df  %>% select(-all_of(remove_var))
+
+  # --- Update variable lists ---
+  categorical_sub <- intersect(categorical_vars, names(train_df_sub))
+  numeric_sub     <- intersect(numeric_vars, names(train_df_sub))
+
+  # --- Rebuild recipe ---
+  rec_sub <- recipe(winner ~ ., data=train_df_sub) %>%
+    update_role(match_id, new_role="ID") %>%
+    step_unknown(all_nominal_predictors()) %>% 
+    step_string2factor(all_nominal_predictors()) %>%
+    step_impute_median(all_of(numeric_sub)) %>%
+    step_normalize(all_of(numeric_sub))
+
+  prep_sub <- prep(rec_sub)
+  train_p <- bake(prep_sub, train_df_sub)
+  test_p  <- bake(prep_sub, test_df_sub)
+
+  # --- Prepare training inputs ---
+  x_train_sub <- lapply(categorical_sub, function(col) {
+    as.integer(train_p[[col]])
+  })
+  names(x_train_sub) <- categorical_sub
+
+  x_train_sub[["numeric_input"]] <- as.matrix(train_p[numeric_sub])
+  y_train_sub <- as.integer(train_p$winner) - 1
+
+  # --- Build embedding layers ---
+  embed_layers_sub <- map(categorical_sub, ~{
+    n_levels <- length(levels(train_p[[.x]]))
+    make_embedding(.x, n_levels)
+  })
+
+  numeric_input_sub <- layer_input(shape=length(numeric_sub), name="numeric_input")
+  numeric_dense_sub <- numeric_input_sub |> layer_dense(units=32, activation="relu")
+
+  all_inputs_sub <- c(map(embed_layers_sub, "input"), list(numeric_input_sub))
+  all_embeds_sub <- map(embed_layers_sub, "output")
+
+  # --- Build network ---
+  out_sub <- layer_concatenate(c(all_embeds_sub, list(numeric_dense_sub))) |>
+    layer_dense(units=128, activation="relu") |>
+    layer_dropout(0.3) |>
+    layer_dense(units=64, activation="relu") |>
+    layer_dropout(0.3) |>
+    layer_dense(units=2, activation="softmax", name="output")
+
+  model_sub <- keras_model(inputs=all_inputs_sub, outputs=out_sub)
+
+  model_sub |> compile(
+    loss="sparse_categorical_crossentropy",
+    optimizer="adam",
+    metrics="accuracy"
+  )
+
+  # --- Train model ---
+  model_sub |> fit(
+    x = x_train_sub,
+    y = y_train_sub,
+    epochs = 15,          # Shorter training for LOFO speed
+    batch_size = 64,
+    verbose = 0
+  )
+
+  # --- Test inputs ---
+  x_test_sub <- lapply(categorical_sub, function(col) {
+    as.integer(test_p[[col]])
+  })
+  names(x_test_sub) <- categorical_sub
+  x_test_sub[["numeric_input"]] <- as.matrix(test_p[numeric_sub])
+  y_test_sub <- as.integer(test_p$winner) - 1
+
+  # --- Evaluate accuracy ---
+  acc <- (model_sub |> evaluate(x_test_sub, y_test_sub, verbose=0))$accuracy
+
+  return(acc)
+}
+
+# -------------------------------
+# 3. Run LOFO for all variables
+# -------------------------------
+lofo_results <- map_dbl(all_vars, run_lofo)
+names(lofo_results) <- all_vars
+
+lofo_df <- tibble(
+  variable = names(lofo_results),
+  accuracy = lofo_results
+)
+
+# -------------------------------
+# 4. Plot LOFO Importance
+# -------------------------------
+ggplot(lofo_df, aes(x = reorder(variable, accuracy), y = accuracy)) +
+  geom_col(fill="steelblue") +
+  coord_flip() +
+  labs(
+    title = "Leave-One-Feature-Out (LOFO) Variable Importance",
+    subtitle = "Lower accuracy = more important feature",
+    x = "Feature Removed",
+    y = "Test Accuracy"
+  ) +
+  theme_minimal(base_size = 14)
+
+```
+
+
+
