@@ -18,6 +18,8 @@ library(tidyverse)
 library(janitor)
 library(recipes)
 library(keras3)
+
+set.seed(47)
 ```
 
 ## Load and recode raw data
@@ -64,6 +66,7 @@ raw_data <- files %>%
   discard(is.null) %>%
   bind_rows(.id = "match_id")
 ```
+
 
 ## Feature engineering
 
@@ -117,7 +120,7 @@ parse_score <- function(score_string) {
 
 desired_cols <- c(
   "match_id", "winner", "p1_name", "p2_name",
-  "x1_01_position", "x1_02_duration", "x1_03_score", "x1_04_ending_shot_marker_id",
+  "x1_02_duration", "x1_03_score",
   "x1_2_rally_outcome", "x1_2_1_rally_outcome_detailed", "x1_3_rally_length", "x1_3_1_rally_length_detailed",
   "x1_4_game_score_conditions", "x1_5_set_score_conditions",
   "x2_1_ending_shot_shot_type", "x2_2_ending_shot_shot_category", "x2_3_ending_shot_shot_direction",
@@ -146,6 +149,17 @@ clean_data <- raw_data %>%
   )
 ```
 
+
+### Clean data sample row
+
+One cleaned observation (after recoding and parsing score context) to show the shape of the dataset that feeds the feature engineering steps.
+
+```{r clean-sample-row, echo=FALSE}
+clean_data %>%
+  slice(50) %>%
+  knitr::kable(table.attr = 'data-no-collapse="true"')
+```
+
 ## Skill buckets
 
 Grouping columns into trainable skill areas simplifies both LOFO and counterfactual tweaks.
@@ -161,6 +175,73 @@ skill_buckets <- list(
 )
 ```
 
+## Example match stats (one match)
+
+Pull one match (first in the set), compute basic stats for each player, and visualize them side-by-side.
+
+```{r match-stats, message=FALSE, warning=FALSE}
+example_match_id <- clean_data$match_id[[1]]
+match_df <- clean_data %>% filter(match_id == example_match_id)
+
+if (nrow(match_df) > 0) {
+  detect_flag <- function(col, pattern) {
+    str_detect(str_to_lower(coalesce(col, "")), pattern)
+  }
+
+  match_df <- match_df %>%
+    mutate(
+      server_name   = if_else(server == "P1", p1_name, p2_name),
+      returner_name = if_else(server == "P1", p2_name, p1_name),
+      server_won    = winner == server,
+      returner_won  = !server_won,
+      ace           = detect_flag(x1_2_rally_outcome, "ace") | detect_flag(x6_1_cheap_point, "ace"),
+      double_fault  = detect_flag(x1_2_rally_outcome, "double") | detect_flag(x1_2_1_rally_outcome_detailed, "double"),
+      net_approach  = detect_flag(x5_4_serve_1_shot_hitting_point, "net")
+    )
+
+  players <- unique(c(match_df$p1_name, match_df$p2_name))
+
+  summarize_player <- function(player) {
+    tibble(
+      player = player,
+      aces = sum(match_df$ace & match_df$server_name == player, na.rm = TRUE),
+      double_faults = sum(match_df$double_fault & match_df$server_name == player, na.rm = TRUE),
+      first_serve_points = sum(match_df$server_name == player & match_df$x3_2_serve_order == "1st serve", na.rm = TRUE),
+      first_serve_points_won = sum(match_df$server_name == player & match_df$server_won & match_df$x3_2_serve_order == "1st serve", na.rm = TRUE),
+      second_serve_points_won = sum(match_df$server_name == player & match_df$server_won & match_df$x3_2_serve_order == "2nd serve", na.rm = TRUE),
+      return_points_won = sum(match_df$returner_name == player & match_df$returner_won, na.rm = TRUE),
+      break_points_won = sum(match_df$returner_name == player & match_df$returner_won & match_df$is_break_point == 1, na.rm = TRUE),
+      net_approaches = sum(match_df$net_approach & match_df$server_name == player, na.rm = TRUE),
+      total_points_won = sum(
+        (match_df$server_won & match_df$server_name == player) |
+          (match_df$returner_won & match_df$returner_name == player),
+        na.rm = TRUE
+      )
+    )
+  }
+
+  match_stats <- map_dfr(players, summarize_player)
+
+  match_stats_long <- match_stats %>%
+    pivot_longer(-player, names_to = "metric", values_to = "value")
+
+  match_stats_long %>%
+    ggplot(aes(x = metric, y = value, fill = player)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+    coord_flip() +
+    labs(
+      title = "Example match stats (one match)",
+      subtitle = paste("Match ID:", example_match_id),
+      x = NULL,
+      y = "Count / points",
+      fill = "Player"
+    ) +
+    theme_minimal(base_size = 13)
+} else {
+  message("No match data available to summarize.")
+}
+```
+
 ## Train/test split and preprocessing
 
 We keep player names as categorical inputs (embedded) so the model can learn player-specific baselines. High-cardinality columns are handled with embeddings.
@@ -172,7 +253,6 @@ clean_data <- clean_data %>%
     winner = as.factor(winner)
   )
 
-set.seed(123)
 train_matches <- sample(unique(clean_data$match_id), size = 0.8 * n_distinct(clean_data$match_id))
 train_df <- filter(clean_data, match_id %in% train_matches)
 test_df  <- filter(clean_data, !match_id %in% train_matches)
@@ -385,6 +465,30 @@ lofo_results %>%
   coord_flip() +
   labs(title = "LOFO by Skill Bucket", x = "Bucket removed", y = "Accuracy (held-out)") +
   theme_minimal(base_size = 13)
+
+# Show the buckets that shifted accuracy the most (lowest) and least (highest) — top/bottom 3
+lofo_extremes <- bind_rows(
+  slice_min(lofo_results, accuracy, n = 3, with_ties = TRUE),
+  slice_max(lofo_results, accuracy, n = 3, with_ties = TRUE)
+) %>%
+  distinct()
+
+lofo_extremes %>%
+  ggplot(aes(x = reorder(bucket, accuracy), y = accuracy, fill = accuracy == min(accuracy))) +
+  geom_col() +
+  scale_fill_manual(
+    values = c("TRUE" = "indianred3", "FALSE" = "seagreen3"),
+    labels = c("Most change", "Least change"),
+    guide = guide_legend(title = NULL)
+  ) +
+  coord_flip() +
+  labs(
+    title = "Top/bottom LOFO buckets",
+    x = "Bucket removed",
+    y = "Accuracy (held-out)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom")
 ```
 
 ## Counterfactual uplift per player and skill
@@ -467,12 +571,6 @@ uplift_table <- crossing(player = all_players, bucket = names(skill_buckets)) %>
 ## Report-ready tables
 
 ```{r player-recs, echo=FALSE}
-# Top-3 recommendations per player
-top3 <- uplift_table %>%
-  group_by(player) %>%
-  slice_max(order_by = uplift, n = 3, with_ties = FALSE) %>%
-  arrange(player, desc(uplift))
-
 # Top-1 recommendation per player
 top1 <- uplift_table %>%
   group_by(player) %>%
@@ -485,21 +583,5 @@ knitr::kable(
   col.names = c("Player", "Skill bucket", "Uplift (Delta point-win prob)")
 )
 
-knitr::kable(
-  top3,
-  digits = 3,
-  col.names = c("Player", "Skill bucket", "Uplift (Delta point-win prob)")
-)
 
-# Author highlights: focus areas for project authors (if present in the data)
-author_players <- c("Neil Chulani", "Charlie Coleman", "Drew Goldman")
-
-authors_top1 <- top1 %>%
-  filter(player %in% author_players)
-
-knitr::kable(
-  authors_top1,
-  digits = 3,
-  col.names = c("Author", "Skill bucket", "Uplift (Delta point-win prob)")
-)
 ```
