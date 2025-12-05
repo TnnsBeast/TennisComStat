@@ -472,6 +472,12 @@ body {
   .btn-cta { width: 100%; justify-content: center; }
   .hero { padding: 1.15rem; }
 }
+
+.confidence-table td:last-child { min-width: 160px; }
+.confidence-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.01em; }
+.conf-low { background: #fee2e2; color: #b91c1c; border: 1px solid #fecdd3; }
+.conf-mid { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.conf-high { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 </style>
 
 
@@ -1239,129 +1245,159 @@ $loss
 <h2 class="anchored" data-anchor-id="report-ready-tables">Player Specific Recommendations</h2>
 <div class="cell">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="caption-top table table-sm table-striped small confidence-table">
 <thead>
 <tr class="header">
 <th style="text-align: left;">Player</th>
-<th style="text-align: left;">Recommended focus</th>
+<th style="text-align: left;">Focus</th>
+<th style="text-align: left;">Confidence</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Advik Mareedu</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-mid">Moderately confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Anirudh Gupta</td>
-<td style="text-align: left;">return</td>
+<td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Ben Lammert</td>
 <td style="text-align: left;">serve plus one</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Blake Bothmer</td>
 <td style="text-align: left;">return</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Brandon Vu</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Caleb Settles</td>
 <td style="text-align: left;">pressure</td>
+<td style="text-align: left;"><span class="confidence-pill conf-low">Not confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Charlie Coleman</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-mid">Moderately confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Drew Goldman</td>
 <td style="text-align: left;">pressure</td>
+<td style="text-align: left;"><span class="confidence-pill conf-low">Not confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Ethan Zou</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Henry Hyden</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Hugh Hentschel</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Jack Scott</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Jay Mallampati</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">John Wehrle</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Jordan Theron</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Josh Kim</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-mid">Moderately confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Kael Shalin Shah</td>
-<td style="text-align: left;">serve</td>
+<td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Leo Rocca</td>
 <td style="text-align: left;">pressure</td>
+<td style="text-align: left;"><span class="confidence-pill conf-low">Not confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Lucas Elkins</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Luke Feng</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Matthew Robinson</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Neil Chulani</td>
 <td style="text-align: left;">serve plus one</td>
+<td style="text-align: left;"><span class="confidence-pill conf-low">Not confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Noah Laber</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Noah Lewis</td>
 <td style="text-align: left;">serve plus one</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Sam English</td>
 <td style="text-align: left;">rally control</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Sam Saeed</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Talman Ramsey</td>
 <td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Tanner Ige</td>
-<td style="text-align: left;">serve plus one</td>
+<td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Tarm Rojanasoonthon</td>
-<td style="text-align: left;">serve plus one</td>
+<td style="text-align: left;">serve</td>
+<td style="text-align: left;"><span class="confidence-pill conf-high">Very confident</span></td>
 </tr>
 </tbody>
 </table>
