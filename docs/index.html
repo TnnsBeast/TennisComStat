@@ -1002,9 +1002,9 @@ body {
 <section id="traintest-split-and-preprocessing" class="level2">
 <h2 class="anchored" data-anchor-id="traintest-split-and-preprocessing">Train/test split and preprocessing</h2>
 <ol>
-<li>Embed every categorical input—including player IDs, serve/return descriptors, and score-context factors—into small trainable vectors (~√levels).</li>
-<li>Normalize numeric inputs for stable training.</li>
-<li>Concatenate all embeddings with normalized numerics to capture player baselines and interaction effects without huge one-hots.</li>
+<li>Embed every categorical input—including player IDs, serve/return descriptors, and score-context factors—into small trainable vectors so the model can learn identities and context patterns.</li>
+<li>Normalize numeric inputs in the recipe so scales are comparable before the model sees them.</li>
+<li>Concatenate embeddings with the normalized numerics; that combined tensor is what the network trains on.</li>
 </ol>
 <div class="cell">
 <details class="code-fold">
@@ -1052,8 +1052,8 @@ body {
 <section id="embedding-model-full-feature-set" class="level2">
 <h2 class="anchored" data-anchor-id="embedding-model-full-feature-set">Embedding model (full feature set)</h2>
 <ol>
-<li>Embed each categorical column (~√(levels + 1)), including player IDs, to learn per-player baselines.</li>
-<li>Normalize numeric features.</li>
+<li>Embed each categorical column (including player IDs) to anchor per-player baselines and shot/context patterns.</li>
+<li>Use the already normalized numeric features from the recipe without further scaling here.</li>
 <li>Concatenate embeddings + numerics, then pass through 128 → 64 ReLU layers with dropout to predict point-win odds.</li>
 </ol>
 <div class="cell">
